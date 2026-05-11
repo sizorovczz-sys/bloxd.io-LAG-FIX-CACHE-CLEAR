@@ -1,0 +1,42 @@
+// ==UserScript==
+// @name         Bloxd.io Unban Script
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Attempt to unban yourself in bloxd.io (for educational purposes only)
+// @author       ZORO
+// @match        *://bloxd.io/*
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // This script attempts to remove ban status by clearing local storage and cookies related to ban
+    // Note: Actual unbanning requires server-side action and cannot be bypassed by client scripts.
+
+    // Clear localStorage keys related to ban
+    for (let key in localStorage) {
+        if (key.toLowerCase().includes('ban')) {
+            localStorage.removeItem(key);
+        }
+    }
+
+    // Clear sessionStorage keys related to ban
+    for (let key in sessionStorage) {
+        if (key.toLowerCase().includes('ban')) {
+            sessionStorage.removeItem(key);
+        }
+    }
+
+    // Clear cookies related to ban
+    document.cookie.split(";").forEach(function(c) {
+        if (c.toLowerCase().includes('ban')) {
+            document.cookie = c.split("=")[0] + "=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;";
+        }
+    });
+
+    // Reload page after cleanup
+    setTimeout(() => {
+        location.reload();
+    }, 1000);
+})();
