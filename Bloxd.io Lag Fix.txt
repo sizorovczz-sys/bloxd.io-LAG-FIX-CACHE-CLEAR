@@ -1,0 +1,67 @@
+// ==UserScript==
+// @name         Bloxd.io Lag Fix
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Attempt to reduce lag on bloxd.io by optimizing game settings and disabling unnecessary features
+// @author       ZORO
+// @match        *://bloxd.io/*
+// @grant        none
+// @run-at       document-start
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Override requestAnimationFrame to limit FPS to 60 (or lower if needed)
+    const maxFPS = 60;
+    let lastFrameTime = 0;
+
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    window.requestAnimationFrame = function(callback) {
+        return originalRequestAnimationFrame.call(window, function(time) {
+            if (time - lastFrameTime >= 1000 / maxFPS) {
+                lastFrameTime = time;
+                callback(time);
+            } else {
+                // Skip frame to reduce CPU/GPU load
+                window.requestAnimationFrame(callback);
+            }
+        });
+    };
+
+    // Wait for the game to load and then tweak settings
+    function optimizeGame() {
+        try {
+            // Access the game's global variables or settings if possible
+            // Disable shadows, lower graphics quality, disable particles, etc.
+
+            // Example: if the game uses a global config object
+            if (window.gameSettings) {
+                window.gameSettings.shadows = false;
+                window.gameSettings.particles = false;
+                window.gameSettings.graphicsQuality = 'low';
+                window.gameSettings.effects = false;
+            }
+
+            // If the game uses Three.js or similar, try to reduce renderer quality
+            if (window.renderer) {
+                window.renderer.setPixelRatio(0.5);
+                window.renderer.shadowMap.enabled = false;
+            }
+
+            // Disable any heavy event listeners or intervals if identifiable
+            if (window.heavyInterval) {
+                clearInterval(window.heavyInterval);
+            }
+        } catch (e) {
+            // Fail silently
+        }
+    }
+
+    // Run optimization after page load and periodically
+    window.addEventListener('load', () => {
+        optimizeGame();
+        setInterval(optimizeGame, 10000);
+    });
+
+})();
